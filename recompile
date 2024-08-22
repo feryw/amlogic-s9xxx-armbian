@@ -68,7 +68,7 @@ auto_kernel="true"
 # Set whether to apply custom kernel patches, options: [ true / false ]
 auto_patch="false"
 # Set custom signature for the kernel
-custom_name="-ophub"
+custom_name="-wyref"
 # Set the kernel compile object, options: [ dtbs / all ]
 package_list="all"
 # Set the compression format, options: [ gzip / lzma / xz / zstd ]
@@ -227,7 +227,7 @@ init_var() {
 
     # Set cross compilation parameters
     export SRC_ARCH="arm64"
-    export LOCALVERSION="${custom_name}"
+    export LOCALVERSION=""
 }
 
 toolchain_check() {
@@ -249,7 +249,7 @@ toolchain_check() {
 
         # Download Armbian rootfs file. If it fails, wait 1 minute and try again, try 10 times.
         for i in {1..10}; do
-            curl -fsSL "${dev_repo}/${armbian_rootfs_file}" -o "${armbian_path}/${armbian_rootfs_file}"
+            curl -fsSL "https://ghproxy.com/${dev_repo}/${armbian_rootfs_file}" -o "${armbian_path}/${armbian_rootfs_file}"
             [[ "${?}" -eq "0" ]] && break || sleep 60
         done
         [[ "${?}" -eq "0" ]] || error_msg "Armbian file download failed"
@@ -557,7 +557,7 @@ compile_env() {
     echo -e "${STEPS} Start checking local compilation environments..."
 
     # Get kernel output name
-    kernel_outname="${kernel_version}${custom_name}"
+    kernel_outname="${kernel_version}"
     echo -e "${INFO} Compile kernel output name: [ ${kernel_outname} ]"
 
     # Create a temp directory
@@ -576,10 +576,10 @@ compile_env() {
     echo -e "${INFO} LD: [ ${LD} ]"
 
     # Set generic make string
-    MAKE_SET_STRING=" ARCH=${SRC_ARCH} CROSS_COMPILE=${CROSS_COMPILE} CC=${CC} LD=${LD} ${MFLAGS} LOCALVERSION=${LOCALVERSION} "
+    MAKE_SET_STRING=" ARCH=${SRC_ARCH} CROSS_COMPILE=${CROSS_COMPILE} LD=${LD} ${MFLAGS} LOCALVERSION=${LOCALVERSION} "
 
     # Make clean/mrproper
-    make ${MAKE_SET_STRING} mrproper
+    make ${MAKE_SET_STRING} CC="ccache ${CC}" mrproper
 
     # Check .config file
     if [[ ! -s ".config" ]]; then
@@ -604,7 +604,7 @@ compile_env() {
     }
 
     # Make menuconfig
-    #make ${MAKE_SET_STRING} menuconfig
+    #make ${MAKE_SET_STRING} CC="ccache ${CC}" menuconfig
 
     # Set max process
     PROCESS="$(cat /proc/cpuinfo | grep "processor" | wc -l)"
@@ -616,7 +616,7 @@ compile_dtbs() {
 
     # Make dtbs
     echo -e "${STEPS} Start compilation dtbs [ ${local_kernel_path} ]..."
-    make ${MAKE_SET_STRING} dtbs -j${PROCESS}
+    make ${MAKE_SET_STRING} CC="ccache ${CC}" dtbs -j${PROCESS}
     [[ "${?}" -eq "0" ]] && echo -e "${SUCCESS} The dtbs is compiled successfully."
 }
 
@@ -625,12 +625,12 @@ compile_kernel() {
 
     # Make kernel
     echo -e "${STEPS} Start compilation kernel [ ${local_kernel_path} ]..."
-    make ${MAKE_SET_STRING} Image modules dtbs -j${PROCESS}
+    make ${MAKE_SET_STRING} CC="ccache ${CC}" Image modules dtbs -j${PROCESS}
     [[ "${?}" -eq "0" ]] && echo -e "${SUCCESS} The kernel is compiled successfully."
 
     # Install modules
     echo -e "${STEPS} Install modules..."
-    make ${MAKE_SET_STRING} INSTALL_MOD_PATH=${output_path}/modules modules_install
+    make ${MAKE_SET_STRING} CC="ccache ${CC}" INSTALL_MOD_PATH=${output_path}/modules modules_install
     [[ "${?}" -eq "0" ]] && echo -e "${SUCCESS} The modules is installed successfully."
 
     # Strip debug information
