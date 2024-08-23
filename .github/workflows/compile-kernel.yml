@@ -107,6 +107,11 @@ jobs:
           sudo timedatectl set-timezone "${TZ}"
           echo "status=success" >> ${GITHUB_OUTPUT}
 
+      - name: Create ccache directory
+        run: |
+          sudo mkdir -p ${{ env.CCACHE_PATH }}
+          sudo chown -R runner:runner ${{ env.CCACHE_PATH }}
+
       - name: Cache ccache
         uses: actions/cache@v3
         with:
