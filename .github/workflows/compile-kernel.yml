@@ -88,6 +88,7 @@ jobs:
         id: init
         env:
           DEBIAN_FRONTEND: noninteractive
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
         run: |
           docker rmi $(docker images -q) 2>/dev/null
           [[ -n "${AGENT_TOOLSDIRECTORY}" ]] && sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
@@ -106,8 +107,6 @@ jobs:
           echo "status=success" >> ${GITHUB_OUTPUT}
           sudo -E apt-get install -y ccache
           ccache --max-size=10G
-        env:
-          CCACHE_DIR: ${{ github.workspace }}/.ccache
 
       - name: Cache ccache
         uses: actions/cache@v3
