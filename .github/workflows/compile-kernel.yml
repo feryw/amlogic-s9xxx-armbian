@@ -1,9 +1,3 @@
-#==========================================================================
-# Description: Compile the kernel
-# Copyright (C) 2021 https://github.com/unifreq/openwrt_packit
-# Copyright (C) 2021 https://github.com/ophub/amlogic-s9xxx-armbian
-#==========================================================================
-
 name: Compile the kernel
 
 on:
@@ -78,6 +72,7 @@ on:
           - -ophub
           - -yourname
           - 
+
 env:
   TZ: Asia/Jakarta
 
@@ -90,17 +85,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache ccache
+        uses: actions/cache@v3
+        with:
+          path: /builder/.ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/compile-kernel/**') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
       - name: Initialization environment
         id: init
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          sudo apt-get -y update
+          sudo apt-get -y install sudo docker ccache
           docker rmi $(docker images -q) 2>/dev/null
           [[ -n "${AGENT_TOOLSDIRECTORY}" ]] && sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
           sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android 2>/dev/null
           sudo swapoff -a
           sudo rm -f /swapfile /mnt/swapfile
-          sudo -E apt-get -y update
           sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
           sudo -E apt-get -y install $(curl -fsSL https://is.gd/depend_ubuntu2204_armbian)
           sudo -E systemctl daemon-reload
@@ -108,7 +112,7 @@ jobs:
           sudo -E apt-get clean
           sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
           sudo rm -rf ~/{.cargo,.dotnet,.rustup}
-          sudo timedatectl set-timezone "${TZ}"        
+          sudo timedatectl set-timezone "${TZ}"
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Create simulated physical disk
