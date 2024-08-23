@@ -106,8 +106,10 @@ jobs:
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Install and configure ccache
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get install -y ccache
+          sudo -E apt-get install -y ccache
           ccache --max-size=10G
         env:
           CCACHE_DIR: ${{ github.workspace }}/.ccache
