@@ -102,18 +102,13 @@ jobs:
           sudo rm -f /swapfile /mnt/swapfile
           sudo -E apt-get -y update
           sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
-          sudo -E apt-get -y install ccache
           sudo -E apt-get -y install $(curl -fsSL https://is.gd/depend_ubuntu2204_armbian)
           sudo -E systemctl daemon-reload
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
           sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
           sudo rm -rf ~/{.cargo,.dotnet,.rustup}
-          sudo timedatectl set-timezone "${TZ}"
-          
-          # Configure ccache size
-          sudo ccache -M 10G
-          
+          sudo timedatectl set-timezone "${TZ}"        
           echo "status=success" >> ${GITHUB_OUTPUT}
 
       - name: Create simulated physical disk
@@ -160,8 +155,6 @@ jobs:
           kernel_sign: ${{ inputs.kernel_sign }}
           kernel_toolchain: ${{ inputs.kernel_toolchain }}
           compress_format: ${{ inputs.compress_format }}
-          extra_args: |
-            CC="ccache gcc" CXX="ccache g++"
 
       - name: Upload Kernel to Release
         uses: ncipollo/release-action@main
