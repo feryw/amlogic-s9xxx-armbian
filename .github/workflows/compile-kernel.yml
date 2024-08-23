@@ -104,11 +104,6 @@ jobs:
           sudo rm -rf ~/{.cargo,.dotnet,.rustup}
           sudo timedatectl set-timezone "${TZ}"
           echo "status=success" >> ${GITHUB_OUTPUT}
-
-      - name: Install and configure ccache
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
           sudo -E apt-get install -y ccache
           ccache --max-size=10G
         env:
