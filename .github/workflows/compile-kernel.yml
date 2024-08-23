@@ -72,9 +72,9 @@ on:
           - -ophub
           - -yourname
           - 
-
 env:
   TZ: Asia/Jakarta
+  CCACHE_PATH: /home/runner/.ccache
 
 jobs:
   build:
@@ -85,35 +85,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache ccache
-        uses: actions/cache@v3
-        with:
-          path: /builder/.ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('**/compile-kernel/**') }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
-
       - name: Initialization environment
         id: init
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo apt-get -y update
-          sudo apt-get -y install sudo docker ccache
           docker rmi $(docker images -q) 2>/dev/null
           [[ -n "${AGENT_TOOLSDIRECTORY}" ]] && sudo rm -rf "${AGENT_TOOLSDIRECTORY}"
           sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android 2>/dev/null
           sudo swapoff -a
           sudo rm -f /swapfile /mnt/swapfile
+          sudo -E apt-get -y update
           sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
           sudo -E apt-get -y install $(curl -fsSL https://is.gd/depend_ubuntu2204_armbian)
           sudo -E systemctl daemon-reload
+          #sudo -E apt-get -y full-upgrade
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
           sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
           sudo rm -rf ~/{.cargo,.dotnet,.rustup}
           sudo timedatectl set-timezone "${TZ}"
           echo "status=success" >> ${GITHUB_OUTPUT}
+
+      - name: Cache ccache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_PATH }}
+          key: ccache-${{ runner.os }}-${{ hashFiles('**/compile-kernel/**') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+            ccache-
+
+      - name: Configure ccache
+        run: |
+          sudo ccache --max-size=10G
 
       - name: Create simulated physical disk
         id: disk
@@ -147,9 +152,6 @@ jobs:
       - name: Compile the kernel [ ${{ inputs.kernel_version }} ]
         uses: feryw/amlogic-s9xxx-armbian@main
         if: ${{ steps.mapped.outputs.status }} == 'success' && !cancelled()
-        env:
-          CCACHE_DIR: /builder/.ccache
-          PATH: "/usr/lib/ccache:${PATH}"
         with:
           build_target: kernel
           kernel_source: ${{ inputs.kernel_source }}
