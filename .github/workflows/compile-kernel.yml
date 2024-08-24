@@ -72,32 +72,7 @@ on:
           - -ophub
           - -yourname
           -
-      parallel_jobs:
-        description: "Number of parallel jobs for compilation"
-        required: false
-        default: 4
-        type: integer
-      caching_strategy:
-        description: "Caching strategy for artifacts"
-        required: false
-        default: "all"
-        type: choice
-        options:
-          - all
-          - modules
-          - initrd
-      optimization_level:
-        description: "Compiler optimization level"
-        required: false
-        default: "O2"
-        type: choice
-        options:
-          - O0
-          - O1
-          - O2
-          - O3
-          - Os
-          
+                
 env:
   TZ: Asia/Jakarta
   CCACHE_PATH: /home/runner/.ccache
@@ -138,18 +113,6 @@ jobs:
           sudo mkdir -p ${{ env.CCACHE_PATH }}
           sudo chown -R runner:runner ${{ env.CCACHE_PATH }}
           df -h ${{ env.CCACHE_PATH }}
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CCACHE_PATH }}
-          key: ccache-${{ runner.os }}-${{ hashFiles('**/compile-kernel/**') }}
-          restore-keys: |
-            ccache-${{ runner.os }}-
-            ccache-
-
-      - name: Configure ccache
-        run: |
           sudo ccache --max-size=10G
 
       - name: Create simulated physical disk
@@ -193,10 +156,7 @@ jobs:
           kernel_sign: ${{ inputs.kernel_sign }}
           kernel_toolchain: ${{ inputs.kernel_toolchain }}
           compress_format: ${{ inputs.compress_format }}
-          parallel_jobs: ${{ inputs.parallel_jobs }}
-          optimization_level: ${{ inputs.optimization_level }}
-          caching_strategy: ${{ inputs.caching_strategy }}
-
+ 
       - name: Upload Kernel to Release
         uses: ncipollo/release-action@main
         if: ${{ env.PACKAGED_STATUS }} == 'success' && !cancelled()
