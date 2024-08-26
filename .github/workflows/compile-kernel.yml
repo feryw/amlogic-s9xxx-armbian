@@ -75,7 +75,6 @@ on:
                 
 env:
   TZ: Asia/Jakarta
-  CCACHE_PATH: /home/runner/.ccache
 
 jobs:
   build:
