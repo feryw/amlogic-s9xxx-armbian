@@ -108,12 +108,10 @@ jobs:
           sudo timedatectl set-timezone "${TZ}"
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Create ccache directory
-        run: |
-          sudo mkdir -p ${{ env.CCACHE_PATH }}
-          sudo chown -R runner:runner ${{ env.CCACHE_PATH }}
-          df -h ${{ env.CCACHE_PATH }}
-          sudo ccache --max-size=10G
+      - name: Install ccache (if not already installed)
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          create-symlink: true  # Create symlink for easier access (optional)
 
       - name: Create simulated physical disk
         id: disk
