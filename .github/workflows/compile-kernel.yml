@@ -111,8 +111,7 @@ jobs:
       - name: Install ccache (if not already installed)
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          create-symlink: true  # Create symlink for easier access (optional)
-          max-size: "5000M"
+          max-size: "10000M"
           verbose: 2
 
       - name: Create simulated physical disk
