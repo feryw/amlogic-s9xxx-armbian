@@ -733,8 +733,7 @@ clean_tmp() {
 
     sync && sleep 3
     rm -rf ${output_path}/{chroot/,boot/,dtb/,modules/,header/,${kernel_version}/}
-    cd ${kernel_path}/${local_kernel_path}
-    make ${MAKE_SET_STRING} CC="ccache ${CC}" mrproper
+    rm -rf ${kernel_path}/${local_kernel_path}
     update-grub 2>/dev/null
 
     echo -e "${SUCCESS} All processes have been completed."
