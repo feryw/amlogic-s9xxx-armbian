@@ -100,7 +100,6 @@ jobs:
           sudo -E apt-get -y install $(curl -fsSL https://is.gd/depend_ubuntu2204_armbian)
           sudo -E systemctl daemon-reload
           #sudo -E apt-get -y full-upgrade
-          sudo -E apt-get purge -y ccache
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
           sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
@@ -112,8 +111,10 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           create-symlink: true  # Create symlink for easier access (optional)
-          max-size: "10000M"
+          max-size: "5000M"
           verbose: 2
+        run:
+          sudo df -Th
 
       - name: Create simulated physical disk
         id: disk
@@ -168,6 +169,6 @@ jobs:
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
-            The kernel can be used to compile Armbian and OpenWrt.
+            The kernel can be used to build Armbian and OpenWrt.
             The kernel source code comes from: ${{ inputs.kernel_source }}
             The kernel compilation toolchain: ${{ inputs.kernel_toolchain }}
