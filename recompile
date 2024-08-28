@@ -733,6 +733,8 @@ clean_tmp() {
 
     sync && sleep 3
     rm -rf ${output_path}/{chroot/,boot/,dtb/,modules/,header/,${kernel_version}/}
+    rm -f ${armbian_path}/${armbian_rootfs_file}
+    rm -rf ${toolchain_path}/*
     rm -rf ${kernel_path}/${local_kernel_path}
     update-grub 2>/dev/null
 
