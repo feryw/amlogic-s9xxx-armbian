@@ -113,8 +113,6 @@ jobs:
           create-symlink: true  # Create symlink for easier access (optional)
           max-size: "5000M"
           verbose: 2
-        run:
-          sudo df -Th
 
       - name: Create simulated physical disk
         id: disk
