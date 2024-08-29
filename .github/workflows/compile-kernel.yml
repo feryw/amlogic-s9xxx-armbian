@@ -108,11 +108,10 @@ jobs:
           sudo timedatectl set-timezone "${TZ}"
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Install ccache (if not already installed)
+      - name: Configure ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           max-size: "10000M"
-          verbose: 2
 
       - name: Create simulated physical disk
         id: disk
