@@ -111,7 +111,7 @@ jobs:
       - name: Configure ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          max-size: "50000M"
+          max-size: "20000M"
 
       - name: Create simulated physical disk
         id: disk
